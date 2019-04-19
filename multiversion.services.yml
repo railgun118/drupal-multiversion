@@ -147,3 +147,8 @@ services:
     arguments: ['@database', '@module_handler']
     tags:
       - { name: event_subscriber }
+  multiversion.search_api_migrate_subscriber:
+    class: Drupal\multiversion\EventSubscriber\SearchApiMigrateSubscriber
+    arguments: ['@module_handler', '@entity_type.manager']
+    tags:
+      - { name: event_subscriber }
