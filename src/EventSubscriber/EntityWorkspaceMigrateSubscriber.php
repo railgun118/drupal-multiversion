@@ -9,6 +9,7 @@ use Drupal\multiversion\Workspace\WorkspaceManagerInterface;
 use Drupal\Core\Entity\Query\QueryFactory;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\multiversion\Event\MultiversionManagerEvent;
+use Drupal\multiversion\MultiversionManager;
 
 /**
  * EntityWorkspaceMigrateSubscriber class.
@@ -100,28 +101,30 @@ class EntityWorkspaceMigrateSubscriber implements EventSubscriberInterface {
    * Delete all entities that do not belong to the default workspace.
    */
   public function onPreMigrate(MultiversionManagerEvent $event) {
-    $workspaces = $this->workspaceManager->loadMultiple();
+    if ($event->getOp() === MultiversionManager::OP_DISABLE) {
+      $workspaces = $this->workspaceManager->loadMultiple();
 
-    // Keep everything for the default workspace.
-    unset($workspaces[$this->defaultWorkspaceId]);
+      // Keep everything for the default workspace.
+      unset($workspaces[$this->defaultWorkspaceId]);
 
-    foreach ($workspaces as $workspace_id => $workspace) {
-      $this->workspaceManager->setActiveWorkspace($workspace);
+      foreach ($workspaces as $workspace_id => $workspace) {
+        $this->workspaceManager->setActiveWorkspace($workspace);
 
-      foreach ($event->getEntityTypes() as $entity_type_id => $entity_type) {
-        $entity_ids = $this->entityQuery->get($entity_type_id)
-          ->condition('workspace', $workspace_id)
-          ->execute();
-        $controller = $this->entityTypeManager->getStorage($entity_type_id);
+        foreach ($event->getEntityTypes() as $entity_type_id => $entity_type) {
+          $entity_ids = $this->entityQuery->get($entity_type_id)
+            ->condition('workspace', $workspace_id)
+            ->execute();
+          $controller = $this->entityTypeManager->getStorage($entity_type_id);
 
-        foreach (array_chunk($entity_ids, self::CHUNK_SIZE) as $chunk_data) {
-          $entities = $controller->loadMultiple($chunk_data);
-          $controller->delete($entities);
+          foreach (array_chunk($entity_ids, self::CHUNK_SIZE) as $chunk_data) {
+            $entities = $controller->loadMultiple($chunk_data);
+            $controller->delete($entities);
+          }
         }
       }
+      // Set the active workspace back to the default value.
+      $this->workspaceManager->setActiveWorkspace($this->activeWorkspace);
     }
-    // Set the active workspace back to the default value.
-    $this->workspaceManager->setActiveWorkspace($this->activeWorkspace);
   }
 
   /**
