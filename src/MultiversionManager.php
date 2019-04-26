@@ -531,9 +531,6 @@ class MultiversionManager implements MultiversionManagerInterface, ContainerAwar
 
       if ($has_data[$entity_type_id]) {
         // Migrate content to temporary storage.
-        if ($storage->getEntityTypeId() === 'file') {
-          $migration->copyFilesToMigrateDirectory($storage);
-        }
         $field_map = $migration->getFieldMap($entity_type, $op, self::TO_TMP);
         $migration->migrateContentToTemp($storage->getEntityType(), $field_map);
       }

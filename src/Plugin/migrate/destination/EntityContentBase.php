@@ -88,24 +88,6 @@ class EntityContentBase extends CoreEntityContentBase {
     if (!$entity) {
       throw new MigrateException('Unable to get entity');
     }
-    if ($entity->getEntityTypeId() == 'file') {
-      $destinations = $row->getDestination();
-
-      if (isset($destinations['uri'])) {
-        $target = file_uri_target($destinations['uri']);
-
-        if ($target !== FALSE) {
-          $destination = 'public://' . $target;
-          if (multiversion_prepare_file_destination($destination)) {
-            // Move the file to a folder from 'public://' directory.
-            file_unmanaged_move($destinations['uri'], $destination, FILE_EXISTS_REPLACE);
-          }
-
-          // @todo Should this still set the destination if the move fails?
-          $entity->uri->setValue($destination);
-        }
-      }
-    }
 
     $ids = $this->save($entity, $old_destination_id_values);
     if ($this->isTranslationDestination()) {

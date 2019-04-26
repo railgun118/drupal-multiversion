@@ -2,8 +2,6 @@
 
 namespace Drupal\multiversion\Plugin\migrate\source;
 
-use Drupal\multiversion\Entity\Storage\ContentEntityStorageInterface;
-
 /**
  * Migration source class for content entities.
  *
@@ -45,11 +43,6 @@ class EntityContentBase extends SourcePluginBase {
               if (count($value) == 1 && empty($value['langcode'])) {
                 $value = reset($value);
               }
-            }
-            // Set the 'migrate://' scheme for files.
-            if ($this->entityTypeId == 'file' && $field_name == 'uri') {
-              $target = file_uri_target($value);
-              $value = 'migrate://' . $target;
             }
             $result[$field_name] = $value;
           }

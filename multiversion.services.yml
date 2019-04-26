@@ -64,10 +64,6 @@ services:
     arguments: ['@workspace.manager']
     tags:
       - { name: cache.context }
-  multiversion.stream_wrapper.migrate:
-    class: Drupal\multiversion\StreamWrapper\MigrateStream
-    tags:
-      - { name: stream_wrapper, scheme: migrate }
   multiversion.plugin.manager.block:
     decorates: plugin.manager.block
     class: Drupal\multiversion\Block\BlockManager
