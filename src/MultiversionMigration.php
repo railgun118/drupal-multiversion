@@ -9,6 +9,7 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Extension\ModuleInstallerInterface;
+use Drupal\file\FileStorageInterface;
 use Drupal\migrate\MigrateExecutable;
 use Drupal\migrate\MigrateMessage;
 use Drupal\migrate\Plugin\MigrationInterface;
@@ -62,7 +63,7 @@ class MultiversionMigration implements MultiversionMigrationInterface {
     $this->updateManager = $update_manager;
     $this->moduleHandler = $module_handler;
     $this->moduleInstaller = $module_installer;
-    
+
   }
 
   /**
@@ -127,6 +128,11 @@ class MultiversionMigration implements MultiversionMigrationInterface {
   public function emptyOldStorage(EntityStorageInterface $storage) {
     if ($storage instanceof ContentEntityStorageInterface) {
       $storage->truncate();
+    }
+    elseif ($storage instanceof FileStorageInterface) {
+      // Do not delete file entity from the storage as it deletes physical
+      // file - just truncate file managed database table.
+      Database::getConnection()->truncate('file_managed')->execute();
     }
     else {
       $entities = $storage->loadMultiple();
