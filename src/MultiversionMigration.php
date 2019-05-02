@@ -63,7 +63,6 @@ class MultiversionMigration implements MultiversionMigrationInterface {
     $this->updateManager = $update_manager;
     $this->moduleHandler = $module_handler;
     $this->moduleInstaller = $module_installer;
-
   }
 
   /**
